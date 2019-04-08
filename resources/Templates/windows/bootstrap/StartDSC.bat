@@ -1,0 +1,1 @@
+powershell -command "& {Start-DscConfiguration -UseExisting -Wait -Verbose -Force; pause}"

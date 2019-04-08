@@ -1,0 +1,368 @@
+{
+    "AllNodes": [
+        {
+            "DomainName": "test.lab",
+            "AdminName": "Administrator",
+            "VHDTemplate": "C:\\ARDY\\VHD Templates\\Win2012_Base-Nov2016.vhdx",
+            "NodeName": "*",
+            "PSDscAllowDomainUser": true,
+            "AdminPassword": "Hyp3r10n",
+            "PSDscAllowPlainTextPassword": true
+        },
+        {
+            "NodeName": "Lab-DC01",
+            "MaximumMemory": 4294967296,
+            "ProcessorCount": 2,            
+            "IP4Addr": "192.168.66.10/24",
+            "Role": [
+                "PrimaryDC",
+                "FileServer"
+            ]
+        },
+        {
+            "NodeName": "Lab-EPM01",
+            "MaximumMemory": 8589934592,
+            "ProcessorCount": 2,
+            "AddToAdminGroup": [
+                "Install Accounts",
+                "Service Accounts"
+            ],
+            "DomainOu": "OU=Lab Servers",
+            "IP4Addr": "192.168.66.20/24",            
+            "Role": [
+                "DomainMember",
+                "IISWeb",
+                "EPMServer"
+            ],
+            "DataDisk": [
+                {
+                    "DriveLetter": "D",
+                    "Name": "DATA",
+                    "MaximumSizeBytes": 42949672960,
+                    "ControllerParams": {
+                        "ControllerType": "SCSI",
+                        "ControllerNumber": 0,
+                        "ControllerLocation": 1
+                    },
+                    "DiskNumber": 1
+                },
+                {
+                    "DriveLetter": "S",
+                    "Name": "EPMINSTALL",
+                    "Path": "C:\\ARDY\\VHD Templates\\EPM24_700.vhdx",
+                    "ControllerParams": {
+                        "ControllerType": "SCSI",
+                        "ControllerNumber": 0,
+                        "ControllerLocation": 2
+                    },
+                    "DiskNumber": 2
+                }
+            ]
+        },
+        {
+            "NodeName": "Lab-SQL01",
+            "MaximumMemory": 8589934592,
+            "ProcessorCount": 2,
+            "AddToAdminGroup": [
+                "Install Accounts",
+                "Service Accounts"
+            ],
+            "DomainOu": "OU=Lab Servers",                                    
+            "IP4Addr": "192.168.66.15/24",
+            "Role": [
+                "DomainMember",
+                "SQLServer"
+            ],
+            "DataDisk": [
+                {
+                    "DriveLetter": "D",
+                    "Path": "",
+                    "MaximumSizeBytes": 42949672960,
+                    "Name": "SQLData",
+                    "ControllerParams": {
+                        "ControllerType": "SCSI",
+                        "ControllerNumber": 0,
+                        "ControllerLocation": 1
+                    },
+                    "DiskNumber": 1
+                }
+            ]            
+        }
+    ],
+
+    "LabConfig": {
+        "VSwitch": {
+            "Name": "LabInt",
+            "Type": "Internal",
+            "IP4Addr": "192.168.66.5/24"
+        },
+        "FilePaths": {
+            "ToCopy": {
+                "BootstrapFolder": "\\ArdyLab\\Data\\windows\\bootstrap\\"
+            },
+            "Unattend": {
+                "TemplateFile": "\\ArdyLab\\Templates\\unattend\\Unattend-template.xml",
+                "OutputFolder": "\\ArdyLab\\Data\\windows\\Unattend\\"
+            },
+            "GeneratedMOFs": {
+                "RoleMOFs": "\\ArdyLab\\Data\\GeneratedMOFs\\ToBeInjected\\",
+                "MOFs": "\\ArdyLab\\Data\\GeneratedMOFs\\"
+            }
+        }
+    },
+    
+    "Roles": {
+        "SQLServer": {
+            "Databases": [
+                {
+                    "Name": "HSS",
+                    "RecoveryModel": "Simple",
+                    "Owner": "EPMSQL"
+                },
+                {
+                    "Name": "RAF",
+                    "RecoveryModel": "Simple",
+                    "Owner": "EPMSQL"
+                },{
+                    "Name": "EPMA",
+                    "RecoveryModel": "Simple",
+                    "Owner": "EPMSQL"
+                },
+                {
+                    "Name": "HFM",
+                    "RecoveryModel": "Simple",
+                    "Owner": "EPMSQL"
+                },
+                {
+                    "Name": "FDMEE",
+                    "RecoveryModel": "Simple",
+                    "Owner": "EPMSQL"
+                }
+            ],
+            "SQLUsers": [
+                {
+                    "Name": "EPMSQL",
+                    "Password": "Hyp3r10n",
+                    "LoginType": "SqlLogin"
+                },
+                {
+                    "Name": "LABSQL",
+                    "Password": "Hyp3r10n",
+                    "LoginType": "SqlLogin"
+                }
+            ],
+            "Setup": {
+                "Features": "SQLENGINE,IS,SSMS,ADV_SSMS",
+                "Instance": "MSSQLSERVER",
+                "SQLCollation": "SQL_Latin1_General_CP1_CI_AS",
+                "SourcePath": "\\\\Lab-DC01\\SQLInstall",
+                "SaPassword": "Hyp3r10n",
+                "SecurityMode": "SQL",
+                "InstallPath": {
+                    "InstallSharedDir": "C:\\Program Files\\Microsoft SQL Server",
+                    "InstallSharedWOWDir": "C:\\Program Files (x86)\\Microsoft SQL Server",
+                    "InstanceDir": "D:\\SQLData",
+                    "InstallSQLDataDir": "D:\\SQLData\\MSSQL\\Data",
+                    "SQLUserDBDir": "D:\\SQLData\\MSSQL\\Data",
+                    "SQLUserDBLogDir": "D:\\SQLData\\MSSQL\\Data",
+                    "SQLTempDBDir": "D:\\SQLData\\MSSQL\\Data",
+                    "SQLTempDBLogDir": "D:\\SQLData\\MSSQL\\Data",
+                    "SQLBackupDir": "D:\\SQLData\\MSSQL\\Data"
+                }
+            },
+            "Net35Source": {
+                "Path": "\\\\Lab-DC01\\Win2012Sources\\Sources\\sxs"
+            }
+        },
+        "FileServer": {
+            "MountVHD": [
+                {
+                    "DriveLetter": "R",
+                    "Path": "",
+                    "MaximumSizeBytes": 42949672960,
+                    "ControllerParams": {
+                        "ControllerType": "SCSI",
+                        "ControllerNumber": 0,
+                        "ControllerLocation": 10
+                    },
+                    "Name": "EPMData",
+                    "DiskNumber": 1
+                },
+                {
+                    "DriveLetter": "S",
+                    "Path": "C:\\ARDY\\VHD Templates\\SQL2012R2_Install.vhdx",
+                    "ControllerParams": {
+                        "ControllerType": "SCSI",
+                        "ControllerNumber": 0,
+                        "ControllerLocation": 11
+                    },
+                    "Name": "SQLInstall",
+                    "DiskNumber": 2
+                },
+                {
+                    "DriveLetter": "T",
+                    "Path": "C:\\ARDY\\VHD Templates\\Win2012-16_Sources.vhdx",
+                    "ControllerParams": {
+                        "ControllerType": "SCSI",
+                        "ControllerNumber": 0,
+                        "ControllerLocation": 12
+                    },
+                    "Name": "Win2012Sources",
+                    "DiskNumber": 3
+                }
+            ]
+        },
+        "PrimaryDC": {
+            "DomainConfig": {
+                "Credentials": {
+                    "DomainAdminName": "Administrator",
+                    "DomainAdminPassword": "Hyp3r10n"                    
+                },                              
+                "AdOUs": [
+                    {
+                        "Path": "",
+                        "Description": "Lab User Accounts",
+                        "Name": "Lab Users",
+                        "Ensure": "Present",
+                        "ProtectedFromAccidentalDeletion": true
+                    },
+                    {
+                        "Path": "OU=Lab Users",
+                        "Description": "EPM Users",
+                        "Name": "EPM Users",
+                        "Ensure": "Present",
+                        "ProtectedFromAccidentalDeletion": true
+                    },
+                    {
+                        "Path": "",
+                        "Description": "Lab Service Accounts",
+                        "Name": "Lab Service Accounts",
+                        "Ensure": "Present",
+                        "ProtectedFromAccidentalDeletion": true
+                    },
+                    {
+                        "Path": "",
+                        "Description": "Lab Servers",
+                        "Name": "Lab Servers",
+                        "Ensure": "Present",
+                        "ProtectedFromAccidentalDeletion": true
+                    }
+                ],
+                "AdUsers": [
+                    {
+                        "Surname": "",
+                        "Description": "Use to install EPM and related software",
+                        "UserName": "epm_install",
+                        "Ensure": "Present",
+                        "Password": "Hyp3r10n",
+                        "GivenName": "",
+                        "PasswordNeverExpires": true,
+                        "Enabled": true,
+                        "Path": "OU=Lab Users",
+                        "DisplayName": "epm_install",
+                        "Tag": [
+                            "epm-install"
+                        ]
+                    },
+                    {
+                        "Surname": "",
+                        "Description": "Use to install EPM and related software",
+                        "UserName": "lab_install",
+                        "Ensure": "Present",
+                        "Password": "Hyp3r10n",
+                        "GivenName": "",
+                        "PasswordNeverExpires": true,
+                        "Enabled": true,
+                        "Path": "OU=Lab Users",
+                        "DisplayName": "lab_install",
+                        "Tag": [
+                            "sql-install"
+                        ]
+                    },
+                    {
+                        "Surname": "",
+                        "Description": "Use to launch Generic Lab Services",
+                        "UserName": "epm_service",
+                        "Ensure": "Present",
+                        "Password": "Hyp3r10n",
+                        "GivenName": "",
+                        "PasswordNeverExpires": true,
+                        "Enabled": true,
+                        "Path": "OU=Lab Service Accounts",
+                        "DisplayName": "epm_service",
+                        "Tag": [
+                            "epm-service"
+                        ]
+                    },
+                    {
+                        "Surname": "",
+                        "Description": "Use to launch SQL Services",
+                        "UserName": "SQL_service",
+                        "Ensure": "Present",
+                        "Password": "Hyp3r10n",
+                        "GivenName": "",
+                        "PasswordNeverExpires": true,
+                        "Enabled": true,
+                        "Path": "OU=Lab Service Accounts",
+                        "DisplayName": "SQL_service",
+                        "Tag": [
+                            "sql-service"
+                        ]
+                    },
+                    {
+                        "Surname": "Black",
+                        "Description": "Sample User",
+                        "UserName": "JoeBlack",
+                        "Ensure": "Present",
+                        "Password": "Hyp3r10n",
+                        "GivenName": "Joe",
+                        "PasswordNeverExpires": true,
+                        "Enabled": true,
+                        "Path": "OU=EPM Users,OU=Lab Users",
+                        "DisplayName": "Joe Black",
+                        "Tag": []
+                    }
+                ],
+                "AdGroups": [
+                    {
+                        "GroupScope": "Global",
+                        "DisplayName": "Install Accounts",
+                        "GroupName": "Install Accounts",
+                        "Category": "Security",
+                        "IncludeMembers": [
+                            "epm_install",
+                            "lab_install"
+                        ],
+                        "Description": "Group will be added to Local Administrators group of each server",
+                        "Ensure": "Present",
+                        "Path": "OU=Lab Users"
+                    },
+                    {
+                        "GroupScope": "Global",
+                        "DisplayName": "Service Accounts",
+                        "GroupName": "Service Accounts",
+                        "Category": "Security",
+                        "IncludeMembers": [
+                            "epm_service", 
+                            "sql_service"
+                        ],
+                        "Description": "Group will be added to Local Administrators group of each server",
+                        "Ensure": "Present",
+                        "Path": "OU=Lab Service Accounts"
+                    }
+                ] 
+            }
+        },
+        "EpmServer": {
+            "UacSetting": "NeverNotifyAndDisableAll",
+            "DisableIEESC": true,
+            "PageFile": {
+                "Drive": "C",
+                "Type": "CustomSize",
+                "InitialSize": 4096,
+                "MaxSize": 4096
+            },
+            "PowerPlan": "High Performance"
+        }
+    }
+}
